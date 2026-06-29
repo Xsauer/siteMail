@@ -50,7 +50,7 @@
       const dealId = params.get('deal_id') || '';
 
       // Вебхук Bitrix24 — подставляем deal_id динамически
-      const webhookBase = 'https://demo.bitrix24.pl/rest/134/k11111111111111/crm.deal.update.json';
+      const webhookBase = 'https://demo.bitrix24.pl/rest/134/klgxspfa0czpo55b/crm.deal.update.json';
       const webhookUrl  = `${webhookBase}?id=${dealId}&fields%5BSTAGE_ID%5D=C10%3AEXECUTING`;
 
       try {
