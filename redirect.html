@@ -1,67 +1,379 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ładowanie...</title>
+  <title>Oferta handlowa</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh;
+      background: #f0f4f8;
+      font-family: Arial, Tahoma, Geneva, sans-serif;
+      color: #1e293b;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+ 
+    /* Loading */
+    #loading {
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #f0f6fb;
-      font-family: Arial, Tahoma, Geneva, sans-serif;
-    }
-    .box {
-      text-align: center;
-      padding: 48px 40px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
-      max-width: 360px;
-      width: 100%;
+      min-height: 60vh;
+      gap: 16px;
     }
     .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid #e2e8f0;
+      width: 44px; height: 44px;
+      border: 3px solid #dde3ea;
       border-top-color: #0382CE;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    h2 { font-size: 1rem; color: #334155; font-weight: 600; margin-bottom: 8px; }
-    p  { font-size: 0.85rem; color: #94a3b8; }
+    #loading p { font-size: 0.9rem; color: #64748b; }
+ 
+    /* Error */
+    #error {
+      display: none;
+      background: #fff;
+      border: 1px solid #fca5a5;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 400px;
+      text-align: center;
+      color: #dc2626;
+    }
+ 
+    /* Main content */
+    #content { display: none; width: 100%; max-width: 720px; }
+ 
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+ 
+    .card-header {
+      background: #0382CE;
+      padding: 28px 36px;
+      color: #fff;
+    }
+    .card-header .label {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 6px;
+    }
+    .card-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .card-header .date {
+      font-size: 0.82rem;
+      opacity: 0.7;
+    }
+ 
+    .card-body { padding: 28px 36px; }
+ 
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    thead tr { background: #f1f5f9; }
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-weight: 600;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+    }
+    td.num { text-align: right; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #f8fafc; }
+ 
+    .total-row {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 16px;
+      border-top: 2px solid #e2e8f0;
+    }
+    .total-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 10px;
+      padding: 14px 24px;
+      text-align: right;
+    }
+    .total-box .total-label {
+      font-size: 0.78rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .total-box .total-amount {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0382CE;
+    }
+ 
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 180px;
+      padding: 13px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: #0382CE; color: #fff; }
+    .btn-primary:hover { background: #0369a8; }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-success:hover { background: #15803d; }
+ 
+    .footer-note {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="box">
+ 
+  <!-- Loading -->
+  <div id="loading">
     <div class="spinner"></div>
-    <h2>Trwa przetwarzanie...</h2>
-    <p>Proszę czekać chwilę.</p>
+    <p>Ładowanie oferty...</p>
   </div>
-
+ 
+  <!-- Error -->
+  <div id="error">
+    <p style="font-size:1.5rem;margin-bottom:8px;">⚠️</p>
+    <p id="error-msg">Nie udało się załadować oferty.</p>
+  </div>
+ 
+  <!-- Content -->
+  <div id="content">
+    <div class="card">
+      <div class="card-header">
+        <div class="label">Oferta handlowa</div>
+        <h1 id="deal-title">—</h1>
+        <div class="date" id="deal-date"></div>
+      </div>
+      <div class="card-body">
+        <table id="products-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Produkt</th>
+              <th>Ilość</th>
+              <th>Cena jedn.</th>
+              <th>Razem</th>
+            </tr>
+          </thead>
+          <tbody id="products-body"></tbody>
+        </table>
+ 
+        <div class="total-row">
+          <div class="total-box">
+            <div class="total-label">Suma całkowita</div>
+            <div class="total-amount" id="total-amount">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-body">
+        <div class="actions">
+          <button class="btn btn-success" onclick="acceptOffer()">✓ Akceptuję ofertę</button>
+          <button class="btn btn-primary" onclick="downloadPDF()">⬇ Pobierz PDF</button>
+        </div>
+        <p class="footer-note" id="accept-status"></p>
+      </div>
+    </div>
+  </div>
+ 
   <script>
-    (async () => {
-      // Читаем deal_id из URL: redirect.html?deal_id=4862
-      const params = new URLSearchParams(window.location.search);
-      const dealId = params.get('deal_id') || '';
 
-      // Вебхук Bitrix24 — подставляем deal_id динамически
-      const webhookBase = 'https://demo.bitrix24.pl/rest/134/klgxspfa0czpo55b/crm.deal.update.json';
-      const webhookUrl  = `${webhookBase}?id=${dealId}&fields%5BSTAGE_ID%5D=C10%3AEXECUTING`;
-
+    const BITRIX_BASE    = 'https://demo.bitrix24.pl/rest/134/klgxspfa0czpo55b';
+    const WEBHOOK_ACCEPT = `${BITRIX_BASE}/crm.deal.update.json`;
+    const STAGE_ACCEPT   = 'C10:EXECUTING'; 
+    const CURRENCY       = 'zł';
+ 
+    const params = new URLSearchParams(window.location.search);
+    const dealId = params.get('deal_id') || params.get('dealId') || '';
+ 
+    let dealData = {};
+    let productsData = [];
+ 
+    async function init() {
+      if (!dealId) { showError('Brak ID oferty w linku.'); return; }
+ 
       try {
-        await fetch(webhookUrl);
+        
+        const [dealRes, productsRes] = await Promise.all([
+          fetch(`${BITRIX_BASE}/crm.deal.get.json?id=${dealId}`),
+          fetch(`${BITRIX_BASE}/crm.deal.productrows.get.json?id=${dealId}`)
+        ]);
+ 
+        const dealJson     = await dealRes.json();
+        const productsJson = await productsRes.json();
+ 
+        if (!dealJson.result) { showError('Nie znaleziono oferty.'); return; }
+ 
+        dealData     = dealJson.result;
+        productsData = productsJson.result || [];
+ 
+        render();
       } catch (e) {
-        console.error('Webhook error:', e);
+        showError('Błąd połączenia z serwerem.');
       }
-
-      // Редиректим на страницу-заглушку
-      window.location.href = 'https://b24-bbgl2x.bitrix24.site/';
-    })();
+    }
+ 
+    function render() {
+      
+      document.getElementById('deal-title').textContent = dealData.TITLE || `Oferta #${dealId}`;
+      document.getElementById('deal-date').textContent  = 'Data: ' + new Date().toLocaleDateString('pl-PL');
+ 
+      const tbody = document.getElementById('products-body');
+      tbody.innerHTML = '';
+ 
+      if (productsData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#94a3b8;text-align:center;padding:20px">Brak pozycji</td></tr>`;
+      } else {
+        productsData.forEach((p, i) => {
+          const qty   = parseFloat(p.QUANTITY) || 1;
+          const price = parseFloat(p.PRICE) || 0;
+          const total = qty * price;
+          tbody.innerHTML += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${p.PRODUCT_NAME || '—'}</td>
+              <td class="num">${qty}</td>
+              <td class="num">${fmt(price)}</td>
+              <td class="num"><strong>${fmt(total)}</strong></td>
+            </tr>`;
+        });
+      }
+ 
+    
+      const sum = parseFloat(dealData.OPPORTUNITY) || productsData.reduce((s, p) => s + (parseFloat(p.PRICE) * parseFloat(p.QUANTITY) || 0), 0);
+      document.getElementById('total-amount').textContent = fmt(sum);
+ 
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    }
+ 
+    async function acceptOffer() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Wysyłanie...';
+      try {
+        await fetch(`${WEBHOOK_ACCEPT}?id=${dealId}&fields%5BSTAGE_ID%5D=${STAGE_ACCEPT}`);
+        btn.textContent = '✓ Zaakceptowano!';
+        btn.style.background = '#15803d';
+        document.getElementById('accept-status').textContent = 'Dziękujemy! Twoja akceptacja została zapisana.';
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '✓ Akceptuję ofertę';
+        document.getElementById('accept-status').textContent = 'Błąd — spróbuj ponownie.';
+      }
+    }
+ 
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+ 
+     
+      doc.setFillColor(3, 130, 206);
+      doc.rect(0, 0, 210, 36, 'F');
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(10);
+      doc.text('OFERTA HANDLOWA', 14, 13);
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text(dealData.TITLE || `Oferta #${dealId}`, 14, 24);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text('Data: ' + new Date().toLocaleDateString('pl-PL'), 14, 32);
+ 
+      
+      const rows = productsData.map((p, i) => {
+        const qty   = parseFloat(p.QUANTITY) || 1;
+        const price = parseFloat(p.PRICE) || 0;
+        return [i+1, p.PRODUCT_NAME || '—', qty, fmt(price), fmt(qty*price)];
+      });
+ 
+      doc.autoTable({
+        startY: 46,
+        head: [['#', 'Produkt', 'Ilość', 'Cena jedn.', 'Razem']],
+        body: rows,
+        styles: { fontSize: 10, cellPadding: 4 },
+        headStyles: { fillColor: [3,130,206], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [241,245,249] },
+        columnStyles: { 0:{cellWidth:10}, 2:{halign:'right'}, 3:{halign:'right'}, 4:{halign:'right'} }
+      });
+ 
+      
+      const sum = parseFloat(dealData.OPPORTUNITY) || productsData.reduce((s,p) => s+(parseFloat(p.PRICE)*parseFloat(p.QUANTITY)||0),0);
+      const y = doc.lastAutoTable.finalY + 10;
+      doc.setTextColor(3,130,206);
+      doc.setFontSize(13);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Suma całkowita: ${fmt(sum)}`, 196, y, { align: 'right' });
+ 
+      doc.setTextColor(150,150,150);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('Dziękujemy za zainteresowanie naszą ofertą.', 14, 287);
+ 
+      doc.save(`Oferta_${dealId}.pdf`);
+    }
+ 
+    function fmt(n) {
+      return parseFloat(n).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + CURRENCY;
+    }
+ 
+    function showError(msg) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display   = 'block';
+      document.getElementById('error-msg').textContent = msg;
+    }
+ 
+    init();
   </script>
 </body>
 </html>
